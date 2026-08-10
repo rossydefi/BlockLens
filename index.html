@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlockLens — Making blockchain data understandable</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/svg+xml" href="assets/images/blocklens-logo.svg" />
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <div id="demo-banner" class="demo-banner hidden"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <span class="brand-name">BlockLens</span>
+        <span class="brand-tagline">Making blockchain data understandable.</span>
+      </div>
+      <nav class="main-nav">
+        <a href="#explorer">Explorer</a>
+        <a href="#gas-calculator">Gas Calculator</a>
+        <a href="#merkle">Merkle Visualizer</a>
+        <a href="#learn">Learn</a>
+        <a href="#jsonrpc">JSON-RPC</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section id="explorer" class="hero">
+      <div class="container">
+        <h1>Explore Ethereum, in plain English.</h1>
+        <p class="hero-sub">Search any wallet address, transaction hash, or block number on the Sepolia test network.</p>
+        <form id="search-form" class="search-form">
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search address, transaction hash or block number..."
+            aria-label="Search address, transaction hash or block number"
+            autocomplete="off"
+          />
+          <button type="submit">Search</button>
+        </form>
+        <div id="results" class="results"></div>
+      </div>
+    </section>
+
+    <section id="gas-calculator" class="section">
+      <div class="container">
+        <h2>Gas Fee Calculator</h2>
+        <p class="section-sub">Fee = Gas Used &times; Gas Price. Try it live below.</p>
+        <form id="gas-form" class="gas-form" onsubmit="return false;">
+          <label>
+            Gas Used
+            <input id="gas-used-input" type="number" value="21000" min="0" />
+          </label>
+          <label>
+            Gas Price (Gwei)
+            <input id="gas-price-input" type="number" value="20" min="0" step="0.01" />
+          </label>
+        </form>
+        <div id="gas-fee-output" class="gas-output">Fee: calculating...</div>
+      </div>
+    </section>
+
+    <section id="merkle" class="section">
+      <div class="container">
+        <h2>Merkle Tree Visualizer</h2>
+        <p class="section-sub">Enter a few values (one per line) to see how their hashes combine into a single root hash.</p>
+        <form id="merkle-form" class="merkle-form">
+          <textarea id="merkle-input" rows="4" placeholder="Transaction 1&#10;Transaction 2&#10;Transaction 3&#10;Transaction 4">Transaction 1
+Transaction 2
+Transaction 3
+Transaction 4</textarea>
+          <button type="submit">Build Tree</button>
+        </form>
+        <div id="merkle-tree-output" class="merkle-tree"></div>
+        <p class="muted small-note">Note: this demo uses SHA-256 (built into every browser) to illustrate the concept. Ethereum itself uses Keccak-256 — a related but different algorithm — inside a more complex structure called a Merkle Patricia Trie. See the Learn section for details.</p>
+      </div>
+    </section>
+
+    <section id="learn" class="section">
+      <div class="container">
+        <h2>Learn Ethereum</h2>
+        <div id="learn-grid" class="learn-grid"></div>
+      </div>
+    </section>
+
+    <section id="jsonrpc" class="section">
+      <div class="container">
+        <h2>How BlockLens Talks to Ethereum: JSON-RPC</h2>
+        <p class="section-sub">Every piece of data on this page comes from sending small JSON requests to an Ethereum node and reading its JSON response. Here are the methods BlockLens uses:</p>
+        <div id="rpc-examples-list" class="rpc-examples"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>BlockLens — built as a learning project. Not affiliated with Etherscan or the Ethereum Foundation.</p>
+    </div>
+  </footer>
+
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/merkle.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/explorer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

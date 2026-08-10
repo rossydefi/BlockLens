@@ -1,0 +1,563 @@
+/* ============================================================
+   STYLE.CSS — BlockLens visual design
+   ============================================================
+   Organized top to bottom in the order things appear on the
+   page: base/reset, header, hero/search, results cards,
+   sections (gas calculator, merkle, learn, json-rpc), footer,
+   toasts, and responsive breakpoints at the bottom.
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0b0f1a;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e6e9f0;
+  --text-muted: #9aa3b5;
+  --accent: #6d5efc;
+  --accent-2: #22d3ee;
+  --success: #34d399;
+  --failed: #f87171;
+  --pending: #fbbf24;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background:
+    radial-gradient(circle at 20% -10%, rgba(109, 94, 252, 0.25), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(34, 211, 238, 0.15), transparent 35%),
+    var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+a {
+  color: var(--accent-2);
+  text-decoration: none;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-tagline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.main-nav a {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.main-nav a:hover {
+  color: var(--text);
+}
+
+/* ---------- Hero / search ---------- */
+.hero {
+  padding: 64px 0 40px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin-bottom: 12px;
+}
+
+.hero-sub {
+  color: var(--text-muted);
+  max-width: 560px;
+  margin: 0 auto 28px;
+}
+
+.search-form {
+  display: flex;
+  gap: 10px;
+  max-width: 640px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.search-form input {
+  flex: 1;
+  min-width: 240px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.search-form input:focus {
+  outline: 2px solid var(--accent);
+}
+
+.search-form button,
+.merkle-form button {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #0b0f1a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.search-form button:hover,
+.merkle-form button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+/* ---------- Results / cards ---------- */
+.results {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(6px);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+}
+
+.address-value {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.copy-btn {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.copy-btn:hover {
+  border-color: var(--accent);
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-neutral { background: rgba(255,255,255,0.1); }
+.badge-info { background: rgba(109, 94, 252, 0.25); color: #c7c1ff; }
+.badge-success { background: rgba(52, 211, 153, 0.2); color: var(--success); }
+.badge-failed { background: rgba(248, 113, 113, 0.2); color: var(--failed); }
+.badge-pending { background: rgba(251, 191, 36, 0.2); color: var(--pending); }
+
+.stat-grid,
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.stat, .detail {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label, .detail span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.stat-value, .detail strong {
+  font-size: 1rem;
+}
+
+.mono {
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.section-subtitle {
+  margin: 22px 0 10px;
+  font-size: 1rem;
+  color: var(--accent-2);
+}
+
+.explain-text {
+  background: rgba(34, 211, 238, 0.08);
+  border-left: 3px solid var(--accent-2);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.tx-hash-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.tx-hash-list a {
+  display: block;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.muted { color: var(--text-muted); }
+.small-note { font-size: 0.8rem; margin-top: 14px; }
+
+.loading-card, .error-card {
+  text-align: center;
+}
+
+.error-card h3 { color: var(--failed); margin-top: 0; }
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-2);
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Generic sections ---------- */
+.section {
+  padding: 56px 0;
+  border-top: 1px solid var(--border);
+}
+
+.section h2 {
+  margin-bottom: 6px;
+}
+
+.section-sub {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* ---------- Gas calculator ---------- */
+.gas-form {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.gas-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.gas-form input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  width: 200px;
+}
+
+.gas-output {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(109, 94, 252, 0.1);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Merkle visualizer ---------- */
+.merkle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 480px;
+}
+
+.merkle-form textarea {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-family: monospace;
+  resize: vertical;
+}
+
+.merkle-tree {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.merkle-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.merkle-row-label {
+  width: 90px;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.merkle-boxes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.merkle-box {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.12);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  font-family: monospace;
+  font-size: 0.8rem;
+  cursor: help;
+}
+
+/* ---------- Learn cards ---------- */
+.learn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.learn-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.learn-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.learn-card h4 {
+  margin: 0 0 8px;
+  color: var(--accent-2);
+}
+
+.learn-card p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ---------- JSON-RPC examples ---------- */
+.rpc-examples {
+  display: grid;
+  gap: 10px;
+}
+
+.rpc-example {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+}
+
+.rpc-example code {
+  color: var(--accent-2);
+  font-weight: 700;
+  min-width: 220px;
+}
+
+.rpc-example span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  padding: 24px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- Demo banner ---------- */
+.demo-banner {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--pending);
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ---------- Toasts ---------- */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 50;
+}
+
+.toast {
+  background: #1a1f2e;
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  animation: toast-in 0.2s ease;
+}
+
+.toast-error {
+  border-color: var(--failed);
+  color: var(--failed);
+}
+
+.toast-hide {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes toast-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .main-nav {
+    gap: 14px;
+  }
+
+  .hero {
+    padding: 40px 0 24px;
+  }
+
+  .gas-form input {
+    width: 100%;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .rpc-example code {
+    min-width: unset;
+  }
+}
