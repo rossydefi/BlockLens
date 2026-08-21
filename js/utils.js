@@ -128,10 +128,10 @@ function formatTimestamp(hexTimestamp) {
 // toast message so the user gets visual confirmation.
 // ---------------------------------------------------------
 function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
+  return navigator.clipboard.writeText(text).then(() => {
     showToast('Copied to clipboard!');
   }).catch(() => {
-    showToast('Could not copy — please copy it manually.');
+    showToast('Could not copy — please copy it manually.', true);
   });
 }
 
@@ -149,6 +149,8 @@ function showToast(message, isError = false) {
   const toast = document.createElement('div');
   toast.className = 'toast' + (isError ? ' toast-error' : '');
   toast.textContent = message;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', isError ? 'assertive' : 'polite');
   toastContainer.appendChild(toast);
 
   setTimeout(() => {
