@@ -24,8 +24,10 @@
 // A free public Sepolia TESTNET endpoint — no signup needed.
 // Sepolia is a test network: the ETH here isn't real money,
 // which makes it safe to build and demo with.
-// Replace this with your own Infura/Alchemy URL if you have one.
-const RPC_URL = 'https://ethereum-sepolia-rpc.publicnode.com';
+// To make the RPC endpoint easy to swap without editing this
+// file, we respect a global `window.BLOCKLENS_RPC_URL` if set.
+// Replace or override that value as needed for your deployment.
+const RPC_URL = window.BLOCKLENS_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
 
 // ---------------------------------------------------------
 // CORE JSON-RPC REQUEST FUNCTION
@@ -115,6 +117,27 @@ async function getTransactionReceipt(hash) {
 // eth_gasPrice — the network's current suggested gas price.
 async function getGasPrice() {
   return rpcRequest('eth_gasPrice', []);
+}
+
+// ---------------------------------------------------------
+// ADDITIONAL HELPERS
+// ---------------------------------------------------------
+// A small wrapper that other parts of the app can call
+// directly when they want to run arbitrary RPC methods.
+function callRpcMethod(method, params = []) {
+  return rpcRequest(method, params);
+}
+
+// eth_chainId — returns the chain id as a hex string
+async function getChainId() {
+  return rpcRequest('eth_chainId', []);
+}
+
+// getLatestBlock — convenience: fetch the latest block object
+async function getLatestBlock() {
+  const latestHex = await getLatestBlockNumber();
+  const latestDec = hexToDecimal(latestHex);
+  return getBlockByNumber(latestDec, false);
 }
 
 // ---------------------------------------------------------

@@ -13,11 +13,49 @@
 document.addEventListener('DOMContentLoaded', () => {
   initDemoModeCheck();
   initSearch();
+  initNetworkStatus();
   initGasCalculator();
   initMerkleVisualizer();
+  initCopyDelegation();
   renderLearningCards();
   renderJsonRpcExamples();
-});
+    if (window.renderRpcPlayground) renderRpcPlayground();
+  });
+
+function initCopyDelegation() {
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest && e.target.closest('.copy-btn');
+    if (!btn) return;
+    const value = btn.dataset && btn.dataset.copy;
+    if (value !== undefined) {
+      // Use the existing helper
+      // show an inline confirmation near the button on success/failure
+      copyToClipboard(value).then(() => {
+        showInlineCopyConfirm(btn, 'Copied');
+      }).catch(() => {
+        showInlineCopyConfirm(btn, 'Could not copy');
+      });
+    }
+  });
+}
+
+function showInlineCopyConfirm(button, text) {
+  try {
+    // remove any existing confirm next to this button
+    const existing = button.parentNode.querySelector('.inline-copy-confirm');
+    if (existing) existing.remove();
+    const span = document.createElement('span');
+    span.className = 'inline-copy-confirm';
+    span.textContent = text;
+    span.style.marginLeft = '8px';
+    span.style.fontSize = '0.85rem';
+    span.style.color = 'var(--accent-2)';
+    button.parentNode.appendChild(span);
+    setTimeout(() => span.remove(), 1600);
+  } catch (e) {
+    /* non-fatal */
+  }
+}
 
 async function initDemoModeCheck() {
   const banner = document.getElementById('demo-banner');
@@ -32,6 +70,27 @@ function initSearch() {
   const form = document.getElementById('search-form');
   const input = document.getElementById('search-input');
 
+  // Add a small dynamic hint below the input that tells the user
+  // whether their current input looks like an address, tx hash,
+  // or block number so they get immediate feedback before submit.
+  let hint = document.getElementById('search-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.id = 'search-hint';
+    hint.className = 'search-hint muted';
+    input.parentNode.insertBefore(hint, input.nextSibling);
+  }
+
+  input.addEventListener('input', () => {
+    const v = input.value.trim();
+    if (!v) { hint.textContent = ''; return; }
+    const t = detectInputType(v);
+    if (t === 'address') hint.textContent = 'Detected: Ethereum address';
+    else if (t === 'tx') hint.textContent = 'Detected: Transaction hash';
+    else if (t === 'block') hint.textContent = 'Detected: Block number';
+    else hint.textContent = 'Not recognized — expected address, tx hash, or block number';
+  });
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const value = input.value.trim();
@@ -39,6 +98,8 @@ function initSearch() {
       showToast('Please enter an address, transaction hash, or block number.', true);
       return;
     }
+    // Final validation happens inside handleSearch; this avoids
+    // accidental extra RPC calls here and gives immediate feedback.
     handleSearch(value);
   });
 }
@@ -47,18 +108,37 @@ function initGasCalculator() {
   const gasUsedInput = document.getElementById('gas-used-input');
   const gasPriceInput = document.getElementById('gas-price-input');
   const output = document.getElementById('gas-fee-output');
+  // Add a unit selector next to the gas price input
+  let unitSelect = document.getElementById('gas-unit-select');
+  if (!unitSelect) {
+    unitSelect = document.createElement('select');
+    unitSelect.id = 'gas-unit-select';
+    unitSelect.innerHTML = `<option value="gwei" selected>Gwei</option><option value="wei">Wei</option><option value="eth">ETH</option>`;
+    gasPriceInput.parentNode.insertBefore(unitSelect, gasPriceInput.nextSibling);
+  }
+
+  // Additional small info element to explain conversions
+  let conversionInfo = document.getElementById('gas-conversion-info');
+  if (!conversionInfo) {
+    conversionInfo = document.createElement('div');
+    conversionInfo.id = 'gas-conversion-info';
+    conversionInfo.className = 'muted small-note';
+    output.parentNode.insertBefore(conversionInfo, output.nextSibling);
+  }
 
   function update() {
-    const result = calculateGasFee(gasUsedInput.value, gasPriceInput.value);
+    const result = calculateGasFee(gasUsedInput.value, gasPriceInput.value, unitSelect.value);
     if (!result) {
       output.textContent = 'Enter valid numbers above.';
       return;
     }
     output.innerHTML = `Fee: <strong>${result.feeEth} ETH</strong> (${result.feeWei} wei)`;
+    conversionInfo.textContent = `Also: ${result.feeGwei} Gwei — weiPerGas: ${result.weiPerGas}`;
   }
 
   gasUsedInput.addEventListener('input', update);
   gasPriceInput.addEventListener('input', update);
+  unitSelect.addEventListener('change', update);
   update();
 }
 
@@ -123,4 +203,71 @@ function renderJsonRpcExamples() {
       <span>${ex.description}</span>
     </div>
   `).join('');
+}
+
+// ---------------------------------------------------------
+// NETWORK STATUS (Dashboard card)
+// Inserts a small network status card below the search form
+// and keeps it up to date with a retry button.
+// ---------------------------------------------------------
+function initNetworkStatus() {
+  const form = document.getElementById('search-form');
+  if (!form) return;
+
+  // Create container right after the search form
+  const wrapper = document.createElement('div');
+  wrapper.id = 'network-status-container';
+  wrapper.className = 'network-status';
+  form.parentNode.insertBefore(wrapper, form.nextSibling);
+
+  async function update() {
+    wrapper.innerHTML = renderLoading('Checking network connection...');
+    try {
+      const [chainIdHex, latestBlockHex, gasPriceHex] = await Promise.all([
+        getChainId(),
+        getLatestBlockNumber(),
+        getGasPrice(),
+      ]);
+
+      const chainMap = {
+        '0x1': 'Mainnet',
+        '0x5': 'Goerli',
+        '0xaa36a7': 'Sepolia',
+      };
+
+      const chainName = chainMap[chainIdHex] || (`Chain ${chainIdHex}`);
+      const latestBlock = hexToDecimal(latestBlockHex);
+      const gasGwei = weiHexToGwei(gasPriceHex);
+
+      wrapper.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <h2>Network Status</h2>
+            <span class="badge badge-info">${chainName}</span>
+          </div>
+          <div class="stat-grid">
+            <div class="stat"><span class="stat-label">Status</span><span class="stat-value">● Connected</span></div>
+            <div class="stat"><span class="stat-label">Latest Block</span><span class="stat-value">${latestBlock}</span></div>
+            <div class="stat"><span class="stat-label">Gas Price</span><span class="stat-value">${gasGwei} Gwei</span></div>
+          </div>
+          <div style="margin-top:10px"><button id="network-retry" class="copy-btn">Retry</button></div>
+        </div>
+      `;
+
+      const retryBtn = document.getElementById('network-retry');
+      if (retryBtn) retryBtn.addEventListener('click', update);
+    } catch (err) {
+      wrapper.innerHTML = renderError('Unable to reach RPC', 'Unable to connect to the configured RPC endpoint.');
+      const retry = document.createElement('div');
+      retry.style.marginTop = '10px';
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Retry';
+      btn.addEventListener('click', update);
+      wrapper.appendChild(retry);
+      retry.appendChild(btn);
+    }
+  }
+
+  update();
 }

@@ -35,6 +35,38 @@ body {
   line-height: 1.5;
 }
 
+/* Skip link for keyboard users */
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.skip-link:focus {
+  left: 20px;
+  top: 12px;
+  width: auto;
+  height: auto;
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  z-index: 60;
+}
+
+/* Focus styles for accessibility */
+button:focus, input:focus, select:focus, textarea:focus, .copy-btn:focus {
+  outline: 3px solid rgba(109,94,252,0.28);
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
 .container {
   max-width: 1080px;
   margin: 0 auto;
@@ -135,6 +167,12 @@ a {
   background: var(--bg-card);
   color: var(--text);
   font-size: 0.95rem;
+}
+
+.search-hint {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 .search-form input:focus {
@@ -355,6 +393,15 @@ a {
   width: 200px;
 }
 
+#gas-unit-select {
+  padding: 10px 12px;
+  margin-left: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+}
+
 .gas-output {
   margin-top: 18px;
   padding: 16px;
@@ -418,6 +465,12 @@ a {
   cursor: help;
 }
 
+.merkle-box--highlight {
+  outline: 3px solid rgba(109,94,252,0.25);
+  background: linear-gradient(90deg, rgba(109,94,252,0.12), rgba(34,211,238,0.08));
+  transform: translateY(-4px);
+}
+
 /* ---------- Learn cards ---------- */
 .learn-grid {
   display: grid;
@@ -476,6 +529,12 @@ a {
   font-size: 0.85rem;
 }
 
+.rpc-playground label { display:block; margin-bottom:8px; }
+.rpc-playground textarea { width:100%; background:var(--bg-card); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:8px; }
+.rpc-playground select { background:var(--bg-card); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:8px; }
+.rpc-playground .rpc-controls { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap }
+.rpc-playground pre { background: rgba(0,0,0,0.15); padding:12px; border-radius:8px; overflow:auto; max-height:360px; }
+
 /* ---------- Footer ---------- */
 .site-footer {
   padding: 24px 0;
@@ -524,6 +583,14 @@ a {
   color: var(--failed);
 }
 
+.inline-copy-confirm {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(109,94,252,0.06);
+  border: 1px solid rgba(109,94,252,0.12);
+}
+
 .toast-hide {
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -561,3 +628,14 @@ a {
     min-width: unset;
   }
 }
+
+/* Network status card spacing */
+.network-status {
+  max-width: 720px;
+  margin: 18px auto 0;
+}
+
+.stat-value { display: flex; align-items: center; gap: 8px; }
+.stat-value span.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.status-connected { background: var(--success); }
+.status-disconnected { background: var(--failed); }

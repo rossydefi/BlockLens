@@ -19,31 +19,53 @@
 // - The multiplication/unit conversion — mixing up Gwei and
 //   Wei is a very common beginner mistake (it's off by 10^9!).
 // ---------------------------------------------------------
-function calculateGasFee(gasUsed, gasPriceGwei) {
-  const gasUsedNum = Number(gasUsed);
-  const gasPriceGweiNum = Number(gasPriceGwei);
+// Parse a decimal string (like "12.345") into a BigInt scaled
+// by `decimals` places. For example, parseDecimalToBigInt("1.5", 9)
+// returns 1500000000n (i.e. 1.5 * 10^9).
+function parseDecimalToBigInt(valueStr, decimals) {
+  const s = String(valueStr).trim();
+  if (!s) return null;
+  if (!/^-?\d*(\.\d+)?$/.test(s)) return null;
+  const negative = s.startsWith('-');
+  const [wholePart, fracPart = ''] = s.replace('-', '').split('.');
+  const frac = (fracPart + '0'.repeat(decimals)).slice(0, decimals);
+  const combined = BigInt(wholePart || '0') * BigInt(10 ** decimals) + BigInt(frac || '0');
+  return negative ? -combined : combined;
+}
 
-  if (!Number.isFinite(gasUsedNum) || !Number.isFinite(gasPriceGweiNum) || gasUsedNum < 0 || gasPriceGweiNum < 0) {
+// Calculate gas fee supporting units: 'wei', 'gwei', 'eth'
+function calculateGasFee(gasUsed, gasPriceValue, unit = 'gwei') {
+  const gasUsedNum = Number(gasUsed);
+  if (!Number.isFinite(gasUsedNum) || gasUsedNum < 0) return null;
+
+  // Determine weiPerGas as a BigInt depending on unit
+  let weiPerGasBigInt;
+  if (unit === 'wei') {
+    const parsed = parseDecimalToBigInt(String(gasPriceValue), 0);
+    if (parsed === null) return null;
+    weiPerGasBigInt = parsed;
+  } else if (unit === 'gwei') {
+    const parsed = parseDecimalToBigInt(String(gasPriceValue), 9);
+    if (parsed === null) return null;
+    weiPerGasBigInt = parsed;
+  } else if (unit === 'eth') {
+    const parsed = parseDecimalToBigInt(String(gasPriceValue), 18);
+    if (parsed === null) return null;
+    weiPerGasBigInt = parsed;
+  } else {
     return null;
   }
 
-  // Use BigInt for the actual math to avoid floating-point
-  // rounding errors with large numbers. Gwei input can have
-  // decimals (like "12.5"), so we scale it up by 10^6 first
-  // to turn it into a whole number BigInt can work with, then
-  // multiply by 10^3 more to reach the full gwei-to-wei factor
-  // of 10^9 (1 gwei = 1,000,000,000 wei). No further scaling
-  // is needed after this — weiPerGas below is already the real,
-  // fully-converted wei-per-gas value.
-  const gweiScaled = BigInt(Math.round(gasPriceGweiNum * 1000000)); // gwei value * 10^6
-  const weiPerGas = gweiScaled * 1000n; // * 10^3 more = * 10^9 total = real wei per gas
-  const totalWei = weiPerGas * BigInt(Math.round(gasUsedNum));
-
-  const feeEth = weiToEthFromBigInt(totalWei);
+  const totalWei = weiPerGasBigInt * BigInt(Math.round(gasUsedNum));
+  const feeEth = weiToEthFromBigInt(totalWei, 8);
+  // Also calculate fee in Gwei for display convenience
+  const feeGweiBigInt = totalWei / 1000000000n;
 
   return {
     feeWei: totalWei.toString(),
     feeEth,
+    feeGwei: (feeGweiBigInt.toString()),
+    weiPerGas: weiPerGasBigInt.toString(),
   };
 }
 
